@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Player Movement</title>
+    <style>
+      /* Page layout: center the canvas on a dark background */
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #1b1b1b;
+        color: #f5f5f5;
+        font-family: Arial, sans-serif;
+      }
+
+      /* Canvas border so the game area is easy to see */
+      canvas {
+        border: 2px solid #f5f5f5;
+        background: #2b2b2b;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Fixed-size game canvas (800x600) -->
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+    <script>
+      // ============================
+      // 1) Canvas setup
+      // ============================
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      // ============================
+      // 2) Player configuration
+      // ============================
+      const player = {
+        size: 20,
+        // Start at the exact center of the canvas
+        x: canvas.width / 2 - 10,
+        y: canvas.height / 2 - 10,
+        speed: 4,
+        color: "#4ade80",
+      };
+
+      // ============================
+      // 3) Input state (keys held)
+      // ============================
+      const keys = {
+        up: false,
+        down: false,
+        left: false,
+        right: false,
+      };
+
+      // Helper function to map key presses to movement flags
+      function setKeyState(key, isPressed) {
+        const normalized = key.toLowerCase();
+
+        if (normalized === "w" || key === "ArrowUp") keys.up = isPressed;
+        if (normalized === "s" || key === "ArrowDown") keys.down = isPressed;
+        if (normalized === "a" || key === "ArrowLeft") keys.left = isPressed;
+        if (normalized === "d" || key === "ArrowRight") keys.right = isPressed;
+      }
+
+      // Listen for key down/up so movement is continuous while held
+      window.addEventListener("keydown", (event) => {
+        setKeyState(event.key, true);
+      });
+
+      window.addEventListener("keyup", (event) => {
+        setKeyState(event.key, false);
+      });
+
+      // ============================
+      // 4) Update game state
+      // ============================
+      function update() {
+        // Move in each direction based on held keys
+        if (keys.up) player.y -= player.speed;
+        if (keys.down) player.y += player.speed;
+        if (keys.left) player.x -= player.speed;
+        if (keys.right) player.x += player.speed;
+
+        // Keep player inside canvas boundaries
+        if (player.x < 0) player.x = 0;
+        if (player.y < 0) player.y = 0;
+        if (player.x + player.size > canvas.width) {
+          player.x = canvas.width - player.size;
+        }
+        if (player.y + player.size > canvas.height) {
+          player.y = canvas.height - player.size;
+        }
+      }
+
+      // ============================
+      // 5) Draw game scene
+      // ============================
+      function draw() {
+        // Clear full canvas each frame
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw player square
+        ctx.fillStyle = player.color;
+        ctx.fillRect(player.x, player.y, player.size, player.size);
+      }
+
+      // ============================
+      // 6) Main game loop
+      // ============================
+      function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+
+      // Start loop
+      gameLoop();
+    </script>
+  </body>
+</html>
